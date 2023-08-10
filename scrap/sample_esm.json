@@ -1,0 +1,363 @@
+{
+    "DataVersion": 2,
+    "Name": "Geolocation_Analysis_Processor Streaming Output",
+    "UnixTime": 1691044314.1708543,
+    "CustomAttributes": {
+        "Elements": [
+            {
+                "Key": "Data_Not_For_Maps",
+                "ElementType": "Bools",
+                "BoolData": {
+                    "Values": [true]
+                }
+            }
+        ]
+    },
+    "Data": {
+        "Elements": [
+            {
+                "Name": "UnixTime",
+                "Key": "Data_TimeStamp",
+                "DataUnits": "UnixTime_sec",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [1691044309.0923808, 1691044312.9394372]
+                }
+            },
+            {
+                "Name": "Latitude",
+                "Key": "Location_Latitude",
+                "DataUnits": "LatitudeDeg",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [28.581455050814725, 28.58157511772839]
+                }
+            },
+            {
+                "Name": "Longitude",
+                "Key": "Location_Longitude",
+                "DataUnits": "LongitudeDeg",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [77.20503478999814, 77.20506242296267]
+                }
+            },
+            {
+                "Name": "Text",
+                "Key": "Data_IndicatorText",
+                "ElementType": "Strings",
+                "StringData": {
+                    "Values": [
+                        "28.581455° N 77.205035° E", "28.581575° N 77.205062° E"
+                    ],
+                    "TextFunction": "GeneralText"
+                }
+            }, {
+                "Name": "Freq Center",
+                "Key": "Analysis_Center",
+                "DataUnits": "Frequency_Hz",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [2410351616, 2410839808]
+                }
+            }, {
+                "Name": "Radiated Power",
+                "Key": "GeoLocation_RadiatedPower",
+                "DataUnits": "Power_dBm",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [4, -6]
+                }
+            }, {
+                "Name": "TDOA SNR",
+                "Key": "GeoLocation_Snr",
+                "DataUnits": "Ratio_dB",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [5.966564466176752, 5.183856470224116]
+                }
+            }, {
+                "Name": "Uncertainty C-Lat",
+                "Key": "Uncertainty_Center_Latitude",
+                "DataUnits": "LatitudeDeg",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [28.581455050814725, 28.58157511772839]
+                }
+            }, {
+                "Name": "Uncertainty C-Lng",
+                "Key": "Uncertainty_Center_Longitude",
+                "DataUnits": "LongitudeDeg",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [77.20503478999814, 77.20506242296267]
+                }
+            }, {
+                "Name": "Uncertainty MajorAxis",
+                "Key": "Uncertainty_Major_Axis",
+                "DataUnits": "Distance_m",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [69.59390120631231, 66.9494100489576]
+                }
+            }, {
+                "Name": "Uncertainty MinorAxis",
+                "Key": "Uncertainty_Minor_Axis",
+                "DataUnits": "Distance_m",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [43.25464279839199, 24.453436781372194]
+                }
+            }, {
+                "Name": "Uncertainty Rotation",
+                "Key": "Uncertainty_Rotation",
+                "DataUnits": "Angle_deg",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [31.57477771511742, 49.17673197770596]
+                }
+            }, {
+                "Name": "Uncertainty Confidence",
+                "Key": "Uncertainty_Confidence",
+                "DataUnits": "Percentage",
+                "ElementType": "Ints",
+                "IntData": {
+                    "Values": [190, 190]
+                }
+            }, {
+                "Name": "Processor",
+                "Key": "Analysis_Processor",
+                "ElementType": "Strings",
+                "StringData": {
+                    "Values": [
+                        "Geolocation_Analysis_Processor", "Geolocation_Analysis_Processor"
+                    ],
+                    "TextFunction": "UndefinedText"
+                }
+            }, {
+                "Name": "Processing Type",
+                "Key": "Analysis_ProcessType",
+                "ElementType": "Strings",
+                "StringData": {
+                    "Values": [
+                        "GA [TDOA]", "GA [TDOA]"
+                    ],
+                    "TextFunction": "UndefinedText"
+                }
+            }, {
+                "Name": "Result Flags",
+                "Key": "Analysis_Result_Flags",
+                "ElementType": "Ints",
+                "IntData": {
+                    "Values": [2, 2]
+                }
+            }, {
+                "Name": "Det Guid",
+                "Key": "Signal_Detector_Id",
+                "DataUnits": "GUID_string",
+                "ElementType": "Guids",
+                "GuidData": {
+                    "GuidStrings": ["3caa0b74-bfb5-4ece-b72c-8de81e385a76", "3caa0b74-bfb5-4ece-b72c-8de81e385a76"]
+                }
+            }, {
+                "Name": "Det Name",
+                "Key": "Signal_Detector_Name",
+                "ElementType": "Strings",
+                "StringData": {
+                    "Values": [
+                        "MM2_2.4G", "MM2_2.4G"
+                    ],
+                    "TextFunction": "UndefinedText"
+                }
+            }, {
+                "Name": "Det Conf",
+                "Key": "Data_Decision_Confidence",
+                "DataUnits": "Percentage",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [99.2, 97.6]
+                }
+            }, {
+                "Name": "Det Lvl",
+                "Key": "Data_Decision_Level",
+                "ElementType": "Ints",
+                "IntData": {
+                    "Values": [1, 2]
+                }
+            }, {
+                "Name": "Det Dur",
+                "Key": "Signal_Duration",
+                "DataUnits": "Time_sec",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [0.00206264, 0.00106648]
+                }
+            }, {
+                "Name": "Det Bw",
+                "Key": "Signal_Bandwidth",
+                "DataUnits": "Frequency_Hz",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [13099734, 13675418]
+                }
+            }, {
+                "Name": "Det SNR",
+                "Key": "Signal_SNR",
+                "DataUnits": "Ratio_dB",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [15.930965423583984, 16.17362403869629]
+                }
+            }, {
+                "Name": "Pulse Pwr",
+                "Key": "Signal_Power",
+                "DataUnits": "Power_dBm",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [-73.96479034423828, -79.77397155761719]
+                }
+            }, {
+                "Name": "Pulse SNR",
+                "Key": "Signal_Pulse_SNR",
+                "DataUnits": "Ratio_dB",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [12.697288513183594, 6.701324462890625]
+                }
+            }, {
+                "Name": "Det Data",
+                "Key": "Signal_Decoded_Data",
+                "ElementType": "Strings",
+                "StringData": {
+                    "Values": [
+                        "", ""
+                    ],
+                    "TextFunction": "UndefinedText"
+                }
+            }, {
+                "Name": "Det Time",
+                "Key": "Signal_Detect_Timestamp",
+                "DataUnits": "Time_sec",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [1691044309.0923808, 1691044312.9394372]
+                }
+            }, {
+                "Name": "Origin Guid",
+                "Key": "Signal_Origin",
+                "DataUnits": "GUID_string",
+                "ElementType": "Guids",
+                "GuidData": {
+                    "GuidStrings": ["db01282c-978d-4c7a-a122-eddf00e4e3ac", "db01282c-978d-4c7a-a122-eddf00e4e3ac"]
+                }
+            }, {
+                "Name": "Origin Name",
+                "Key": "Signal_OriginName",
+                "ElementType": "Strings",
+                "StringData": {
+                    "Values": [
+                        "10.1.0.22", "10.1.0.22"
+                    ],
+                    "TextFunction": "UndefinedText"
+                }
+            }, {
+                "Name": "Ant Inp Port",
+                "Key": "Data_Input_Port",
+                "ElementType": "Ints",
+                "IntData": {
+                    "Values": [2, 2]
+                }
+            }, {
+                "Name": "Node Count",
+                "Key": "Analysis_Nodes",
+                "ElementType": "Ints",
+                "IntData": {
+                    "Values": [6, 6]
+                }
+            }, {
+                "Name": "Nodes",
+                "Key": "Analysis_Nodes",
+                "ElementType": "Strings",
+                "StringData": {
+                    "Values": [
+                        "10.1.0.22;10.1.0.21;10.1.0.23", "10.1.0.22;10.1.0.21;10.1.0.23"
+                    ],
+                    "TextFunction": "Information"
+                }
+            }, {
+                "Name": "Node Group Centroid Latitude",
+                "Key": "Analysis_NodeGroup",
+                "DataUnits": "LatitudeDeg",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [28.58430733333333, 28.584306666666667]
+                }
+            }, {
+                "Name": "Node Group Centroid Longitude",
+                "Key": "Analysis_NodeGroup",
+                "DataUnits": "LongitudeDeg",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [77.20613233333333, 77.20613266666666]
+                }
+            }, {
+                "Name": "Node Group Centroid Altitude",
+                "Key": "Analysis_NodeGroup",
+                "DataUnits": "Altitude_m",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [217.73799999999997, 217.67633333333333]
+                }
+            }, {
+                "Name": "Aperture",
+                "Key": "Analysis_Aperture",
+                "DataUnits": "Angle_deg",
+                "ElementType": "Doubles",
+                "DoubleData": {
+                    "Values": [89.92243040355102, 91.63163815031317]
+                }
+            }, {
+                "Name": "Node Locations",
+                "Key": "Analysis_Nodes",
+                "DataUnits": "Bytes_B",
+                "ElementType": "Bytes",
+                "ByteData": {
+                    "Values": "A3cQO1PolDxAxAq3fCRNU0C+nxov3VhrQDHuBtFalTxA3eo56X1NU0B/arx0k+hrQLRxxFp8ljxA0sYRa/FMU0DFILByaGVqQAM2Ia0x6JQ8QKzI6IAkTVNA5dAi2/lWa0Ax7gbRWpU8QN3qOel9TVNAarx0kxjka0C0ccRafJY8QNLGEWvxTFNAYOXQIttlakA="
+                }
+            }, {
+                "Name": "Result ID",
+                "Key": "Analysis_ResultID",
+                "DataUnits": "GUID_string",
+                "ElementType": "Guids",
+                "GuidData": {
+                    "GuidStrings": ["4d5274ae-c0ca-4fe6-8d29-266d37229aa5", "5028f21a-1f0b-4c57-885a-be7b383ef52f"]
+                }
+            }, {
+                "Name": "Geoloc Alg",
+                "Key": "Data_IndicatorText",
+                "ElementType": "Strings",
+                "StringData": {
+                    "Values": [
+                        "Simplex [CI=4] [BW=13.1 M] [OS=1 2048000+0/131072] [OL=0]", "Simplex [CI=4] [BW=13.7 M] [OS=1 2048000+0/131072] [OL=0]"
+                    ],
+                    "TextFunction": "Debug"
+                }
+            }
+        ]
+    },
+    "ColorARGB": 4294303411,
+    "StreamID": {
+        "GuidString": "1ed8c95f-83cc-4ef9-910f-b41d6f4cb2c1",
+        "Name": "Geolocation_Analysis Streaming Output",
+        "ColorARGB": 4294303411,
+        "SubStream": 11,
+        "Content": 3
+    },
+    "OriginID": {
+        "GuidString": "1ed8c95f-83cc-4ef9-910f-b41d6f4cb2b6",
+        "Name": "Geolocation_Analysis",
+        "ColorARGB": 4294303411,
+        "SubStream": 0
+    },
+    "GuidString": "813b3097-3d47-451c-a49f-c8efa362f9e3"
+}
