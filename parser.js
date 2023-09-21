@@ -224,7 +224,7 @@ server.bind(2222, localIP);
 const client = new net.Socket();
 
 const port = 9991;
-const host = '10.1.0.1';
+const host = '103.227.98.157';
 // Replace with the server's hostname or IP address
 
 // Connect to the server
@@ -250,7 +250,8 @@ client.on('data', data => {
         minorAxis,
         detNames,
         frequency;
-    if (dataComingIn == "json") { // console.log(`Received data plain:`, data.toString());
+    if (dataComingIn == "json") { 
+        // console.log(`Received data plain:`, data.toString());
         let dataString = data.toString().replace(/(?:\r\n|\r|\n)/g, '').replace(/  /g, "");
         // console.log("-----------------------------");
         // console.log("Recived data in string", dataString);
@@ -295,16 +296,16 @@ client.on('data', data => {
 
 
         }
-    } else if (dataComingIn == "pb") { // console.log(`Received data plain:`, data);
+    } else if (dataComingIn == "pb") { 
+        //console.log(`Received data plain:`, data);
         let bufData = Buffer.from(data);
-        // logDataToFile("\n\nReceived data In buffer:\n`" + bufData)
-        // console.log(`Received data In buffer:`, bufData);
+        //logDataToFile("\n\nReceived data In buffer:\n`" + bufData)
+        console.log(`Received data In buffer:`, bufData);
 
         try { // Parse the received Protobuf message
             const decodedMessage = Pbd2.decode(bufData);
-            console.log(`Decoded data:`, decodedMessage);
-
-            logDataToFile("\n" + JSON.stringify(decodedMessage))
+            //console.log(`Decoded data:`, decodedMessage);
+            //logDataToFile("\n" + JSON.stringify(decodedMessage))
 
             const parsedMessage = Pbd2.toObject(decodedMessage, {
                 longs: String,
@@ -313,6 +314,7 @@ client.on('data', data => {
             });
 
             logJSONDataToFile("\n" + JSON.stringify(parsedMessage))
+            console.log("\n Data: " + JSON.stringify(parsedMessage))
 
             let finalData = parsedMessage.Data || "";
 
@@ -341,7 +343,8 @@ client.on('data', data => {
             } else {
                 isError = true;
             }
-        } catch (error) { // console.log(error);
+        } catch (error) { 
+            //console.log(error);
             isError = true
         }
     }

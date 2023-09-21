@@ -113,7 +113,7 @@ client.on('data', data => { // console.log(`Received data plain:`, data);
             bytes: String
         });
 
-        // logJSONDataToFile("\n" + JSON.stringify(parsedMessage))
+        logJSONDataToFile("\n" + JSON.stringify(parsedMessage))
 
         let hasDataObject = parsedMessage.Data || "";
         if (hasDataObject) {
@@ -193,7 +193,8 @@ function sendESMDataToClients(emsTrack) {
             "MA": emsTrack.Uncertainty_Major_Axis,
             "MI": emsTrack.Uncertainty_Minor_Axis,
             "DT": emsTrack.Signal_Detector_Name,
-            "FQ": emsTrack.Signal_Bandwidth
+            "FQ": emsTrack.Signal_Bandwidth,
+            "INF" : "Confidence: "+emsTrack.Data_Decision_Confidence+", Band Width: "+emsTrack.Signal_Bandwidth+"."
         }
     };
     console.log(sampleData);
