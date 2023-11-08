@@ -8,15 +8,71 @@ const geolib = require('geolib')
 const ESMTrack = require('./lib/ESMTrack')
 
 // Config variables
-const DATA_FORMAT_ESM = "pb";
 let UDP_CLIENTS = []; // Clients Connected for UDP
 let localIP = ip.address()
 
-const UDP_PORT = 2222 // UDP port to send data to clients
-const PORT = 9991 // Server port for getting ESM data
-const HOST = '103.227.98.157'
-// Server IP for getting ESM data
+const commandTableIP = '192.168.1.121';//'255.255.255.0'; // Broadcast address to send to all devices on the network
+const PORT_LISTEN = 7000;
+const PORT_SEND = 8000;
 
+const ESM_PORT = 9991 // Server port for getting ESM data
+const ESM_HOST = '192.168.1.75' //'103.227.98.157' // Server IP for getting ESM data
+
+let currentDtTm = moment().format('YYYYMMDD_HHmmss');
+console.log("currentDtTm", currentDtTm)
+
+const filePath = "./log/log_" + currentDtTm + ".log"
+const filePathJSON = "./log/log_json_" + currentDtTm + ".log"
+const filePathExec = "./log/log_exec_" + currentDtTm + ".log"
+const filePathRaw = "./log/log_raw_" + currentDtTm + ".log"
+
+try {
+    fs.appendFile(filePath, "\n***************** Parser start ******************", {
+        flag: 'a+'
+    }, (err) => {
+        if (err) {
+            console.log(err)
+        }
+    })
+} catch (ex) {
+    console.log(ex)
+}
+
+try {
+    fs.appendFile(filePathJSON, "\n***************** JSON Parser start ******************", {
+        flag: 'a+'
+    }, (err) => {
+        if (err) {
+            console.log(err)
+        }
+    })
+} catch (ex) {
+    console.log(ex)
+}
+
+try {
+    fs.appendFile(filePathExec, "\n***************** Exception Logger start ******************", {
+        flag: 'a+'
+    }, (err) => {
+        if (err) {
+            console.log(err)
+        }
+    })
+} catch (ex) {
+    console.log(ex)
+}
+
+try {
+    fs.appendFile(filePathRaw, "\n***************** Raw Buffer data start ******************", {
+        flag: 'a+'
+    }, (err) => {
+        if (err) {
+            console.log(err)
+        }
+    })
+} catch (ex) {
+    console.log(ex)
+}
 
 /*
  Load your Protobuf message definition
@@ -24,14 +80,10 @@ const HOST = '103.227.98.157'
 const root = protobuf.loadSync('./pbd2.proto');
 const Pbd2 = root.lookupType('CRFS.Data.pbd2.DataGeneric');
 
-let currentDtTm = moment().format('YYYYMMDD_HHmmss');
-console.log("currentDtTm", currentDtTm)
-
-
 /*
  * Heading calculation logic
  */
-const avgBearingPoints = 4;
+const avgBearingPoints = 6;
 const bearingCoordinates = new Array(avgBearingPoints);
 
 /* UDP server creation */
@@ -68,7 +120,23 @@ server.on('close', function () {
 });
 
 // console.log("Server Local IP:", localIP)
-server.bind(UDP_PORT, localIP);
+server.bind(PORT_LISTEN, localIP,() => {
+    console.log("UDP binding success!")
+
+    //server.setBroadcast(true);
+    // Message to send
+    /* const message = 'Hello, world!';
+
+    // Send the message to all devices on the network
+    server.send(message, PORT_SEND, broadcastAddress, (error) => {
+        if (error) {
+            console.error('Error sending message:', error);
+        } else {
+            console.log(`Message sent to ${broadcastAddress}:${PORT_SEND} from ${localIP}: ${message}`);
+        } 
+        //server.close();
+    }); */
+});
 
 
 /*
@@ -77,8 +145,8 @@ server.bind(UDP_PORT, localIP);
 const client = new net.Socket()
 
 // Connect to the server
-client.connect(PORT, HOST, () => {
-    console.log(`Connected to ${HOST}:${PORT}`);
+client.connect(ESM_PORT, ESM_HOST, () => {
+    console.log(`Connected to ${ESM_HOST}:${ESM_PORT}`);
 
     // Send data to the server
     // client.write('Hello, server!');
@@ -94,18 +162,22 @@ client.on('error', err => {
     console.log(`Socket error: ${err}`);
 });
 
-client.on('data', data => { // console.log(`Received data plain:`, data);
+let finalESMData = [];
+client.on('data', data => { 
+    // console.log(`Received data plain:`, data);
 
     let bufData = Buffer.from(data);
     // console.log("\n\nReceived data In buffer:\n`" + bufData)
     // console.log(`Received data In buffer:`, bufData);
+
+    logRawDataToFile("\n\n"+moment().format('YYYYMMDD_HHmmss')+":\n"+data);
 
     try { 
         // Parse the received Protobuf message
         const decodedMessage = Pbd2.decode(bufData);
         // console.log(`Decoded data:`, decodedMessage);
 
-        console.log("\n" + JSON.stringify(decodedMessage))
+        //console.log("\n" + JSON.stringify(decodedMessage));
 
         const parsedMessage = Pbd2.toObject(decodedMessage, {
             longs: String,
@@ -113,14 +185,15 @@ client.on('data', data => { // console.log(`Received data plain:`, data);
             bytes: String
         });
 
-        logJSONDataToFile("\n" + JSON.stringify(parsedMessage))
+        logJSONDataToFile("\n"+moment().format('YYYYMMDD_HHmmss')+":\n" + JSON.stringify(parsedMessage))
 
         let hasDataObject = parsedMessage.Data || "";
         if (hasDataObject) {
             let esmDataProcessed = {};
 
             let dataElements = emsData.Data.Elements;
-            dataElements.forEach((item, index) => { // console.log(item);
+            dataElements.forEach((item, index) => { 
+                // console.log(item);
                 let key = item.Key;
                 let values;
                 if (item.hasOwnProperty("DoubleData")) {
@@ -142,63 +215,76 @@ client.on('data', data => { // console.log(`Received data plain:`, data);
                 delete esmDataProcessed["Analysis_Nodes"];
             }
 
-            // console.log(`Objects length: ${esmDataProcessed.length} `);
-            console.log(esmDataProcessed);
+            const normalizedData = [];
+            for (const key in esmDataProcessed) {
+                if (esmDataProcessed[key] !== undefined) {
+                    const values = esmDataProcessed[key];
 
-            const esmDataObjectsArray = [];
-            const valuesLength = esmDataProcessed.Location_Latitude.length;
-
-            // Loop through the values' indices
-            for (let i = 0; i < valuesLength; i ++) {
-                const obj = {};
-
-                // Loop through each key in the JSON object
-                for (const key in esmDataProcessed) {
-                    if (esmDataProcessed.hasOwnProperty(key)) {
-                        obj[key] = esmDataProcessed[key][i];
+                    for (let i = 0; i < values.length; i++) {
+                        if (! normalizedData[i]) {
+                            normalizedData[i] = {};
+                        }
+                        normalizedData[i][key] = values[i];
                     }
                 }
-
-                esmDataObjectsArray.push(obj);
             }
 
-            console.log(JSON.stringify(esmDataObjectsArray));
-            objectsArray.forEach(item => {
+            // console.log(normalizedData);
+            console.log("Records Size: ", normalizedData.length);
+            totalCount = totalCount + normalizedData.length;
+
+            finalESMData.push(...normalizedData);
+
+            normalizedData.forEach(item => {
                 let emsTrack = new ESMTrack(item);
                 console.log(emsTrack);
 
-                //Sending Data to clients
-                sendESMDataToClients(emsTrack);
+                const frequencyInGigahertz = hertzToGigahertz(emsTrack.Analysis_Center);
+                finalESMData.push(emsTrack);
+
+                sendESMDataToCT(emsTrack, frequencyInGigahertz);
             })
         } 
     } catch (error) { 
         // console.log(error);
+        logRawDataExecToFile("\n "+moment().format('YYYYMMDD_HHmmss')+":\n"+data+"\n-----\n"+error);
     }
 });
 
-function sendESMDataToClients(emsTrack) { 
+function sendESMDataToCT(emsTrack, trackId) { 
     // let trackName = detNames.replace("MM2", "DGI")
+    let detName  = emsTrack.Signal_Detector_Name || emsTrack.Analysis_Center;
+    let heading = emsTrack.Location_Heading || 0
+
+    if (heading == 0) {
+        pushAndReplace({lat: latitude, lon: longitude})
+        if (bearingCoordinates.length >= avgBearingPoints) {
+            heading = Number.parseInt(calculateAverageBearing(bearingCoordinates) || 0);
+        }
+    } 
+
     let sampleData = {
         "message_id": 1401,
         "message_text": {
-            "HA": emsTrack.Uncertainty_Rotation,
-            "HE": emsTrack.Analysis_NodeGroup,
+            "HA": heading,
+            "HE": emsTrack.Location_Altitude || 0,
             "LA": emsTrack.Location_Latitude,
             "LO": emsTrack.Location_Longitude,
             "S": 0,
-            "T": emsTrack.Data_TimeStamp,
-            "CT": emsTrack.Signal_Detector_Name, // "DL - " + trackName,
+            "T": Date.now(), //emsTrack.Data_TimeStamp,
+            "CT": "AE001_"+trackId,//emsTrack.Signal_Detector_Name, // "DL - " + trackName,
             "CS": "",
             "TI": "H",
             "MA": emsTrack.Uncertainty_Major_Axis,
             "MI": emsTrack.Uncertainty_Minor_Axis,
-            "DT": emsTrack.Signal_Detector_Name,
+            "DT": detName,
             "FQ": emsTrack.Signal_Bandwidth,
             "INF" : "Confidence: "+emsTrack.Data_Decision_Confidence+", Band Width: "+emsTrack.Signal_Bandwidth+"."
         }
     };
     console.log(sampleData);
 
+    /* 
     let sampleData1901 = {
         "message_id": 1901,
         "message_text": {
@@ -219,93 +305,19 @@ function sendESMDataToClients(emsTrack) {
             "WPN_LO": 73.123456,
             "WT": "JAMMER"
         }
-    };
-    //console.log(sampleData1901);
+    }; 
+    console.log(sampleData1901);
+    */
 
-    /* if (isInsideCircle(latitude, longitude)) {
-        sampleData.message_text.TI = "P"
-        sampleData.message_text.HA = 0
-        sampleData.message_text.CT = "DL - Pilot"
-    } */
+    //for (let cl of UDP_CLIENTS) {
 
-    for (let cl of UDP_CLIENTS) {
-        server.send(JSON.stringify(sampleData), cl.port, cl.ip, function (error) {
+    //if(detName != "ADS-B"){
+        server.send(JSON.stringify(sampleData), PORT_SEND, commandTableIP, function (error) {
             if (error) {
                 console.log("error ", error);
             } else {
                 console.log('Data Msg Type 1401 sent !!!');
-                server.send(JSON.stringify(sampleData1901), cl.port, cl.ip, function (error) {
-                    if (error) {
-                        console.log("error ", error);
-                    } else {
-                        console.log('Data sent !!!');
-                    }
-
-                });
-            }
-
-        });
-    }
-}
-
-function sendDataToClients(ha, altitude, latitude, longitude, unixTime, majorAxis, minorAxis, detNames, frequency) { // let trackName = detNames.replace("MM2", "DGI")
-    let sampleData = {
-        "message_id": 1401,
-        "message_text": {
-            "HA": ha,
-            "HE": altitude,
-            "LA": latitude,
-            "LO": longitude,
-            "S": 0,
-            "T": unixTime,
-            "CT": detNames, // "DL - " + trackName,
-            "CS": "",
-            "TI": "H",
-            "MA": majorAxis,
-            "MI": minorAxis,
-            "DT": detNames,
-            "FQ": frequency
-        }
-    };
-    console.log(sampleData);
-
-    /* let sampleData1901 = {
-        "message_id": 1901,
-        "message_text": {
-            "BG": "72.2346993262931",
-            "CT": sampleData.message_text.CT,
-            "DP_LA": 0,
-            "DP_LO": 0,
-            "FOV": 50,
-            "OR": 245,
-            "PIP": 6687307,
-            "RG": 2,
-            "SP": 1,
-            "TGT_LA": latitude,
-            "TGT_LO": longitude,
-            "WID": 1,
-            "WN": "JAM1_1",
-            "WPN_LA": 23.123456,
-            "WPN_LO": 73.123456,
-            "WT": "JAMMER"
-        }
-    };
-    console.log(sampleData1901); */
-
-
-    /* if (isInsideCircle(latitude, longitude)) {
-        sampleData.message_text.TI = "P"
-        sampleData.message_text.HA = 0
-        sampleData.message_text.CT = "DL - Pilot"
-    } */
-
-    for (let cl of UDP_CLIENTS) {
-        server.send(JSON.stringify(sampleData), cl.port, cl.ip, function (error) {
-            if (error) {
-                console.log("error ", error);
-            } else {
-                console.log('Data Msg Type 1401 sent !!!');
-                /* server.send(JSON.stringify(sampleData1901), cl.port, cl.ip, function (error) {
+                /* server.send(JSON.stringify(sampleData1901), PORT_SEND, commandTableIP, function (error) {
                     if (error) {
                         console.log("error ", error);
                     } else {
@@ -316,9 +328,12 @@ function sendDataToClients(ha, altitude, latitude, longitude, unixTime, majorAxi
             }
 
         });
-    }
+    //}
+    //}
 }
-function pushAndReplace(newObject) { // Remove the first element if the array is full
+
+function pushAndReplace(newObject) { 
+    // Remove the first element if the array is full
     if (bearingCoordinates.length === avgBearingPoints) {
         bearingCoordinates.shift();
     }
@@ -326,7 +341,9 @@ function pushAndReplace(newObject) { // Remove the first element if the array is
     // Push the new object to the end of the array
     bearingCoordinates.push(newObject);
 }
-function calculateAverageBearing(coords) { // console.log("coords: ", coords)
+
+function calculateAverageBearing(coords) { 
+    // console.log("coords: ", coords)
     if (coords.length < 2) { // throw new Error('You need at least three sets of coordinates to calculate the average bearing.');
         return 0;
     }
@@ -335,13 +352,13 @@ function calculateAverageBearing(coords) { // console.log("coords: ", coords)
 
     const filteredCoords = coords.filter((element) => element !== undefined);
 
-
     // Calculate bearings for each pair of coordinates and sum them up
     for (let i = 0; i < filteredCoords.length - 1; i ++) {
         let cord1 = filteredCoords[i]
         let cord2 = filteredCoords[i + 1]
         /* const { latitude: cord1.latitude, longitude: cord1.loongitude } = coords[i];
-        const { latitude: lat2, longitude: lon2 } = coords[i + 1]; */ totalBearing += calculateBearing(cord1.lat, cord1.lon, cord2.lat, cord2.lon);
+        const { latitude: lat2, longitude: lon2 } = coords[i + 1]; */ 
+        totalBearing += calculateBearing(cord1.lat, cord1.lon, cord2.lat, cord2.lon);
     }
 
     // Calculate the average bearing
@@ -379,4 +396,51 @@ function calculateBearing(lat1, lon1, lat2, lon2) {
     const normalizedHeading = (headingDegrees + 360) % 360;
 
     return normalizedHeading;
+}
+
+function logJSONDataToFile(dataToLog) {
+    try {
+        fs.appendFile(filePathJSON, dataToLog, {
+            flag: 'a+'
+        }, (err) => {
+            if (err) {
+                console.log(err)
+            }
+        })
+    } catch (ex) {
+        console.log(ex)
+    }
+}
+
+function logRawDataToFile(dataToLog) {
+    try {
+        fs.appendFile(filePathRaw, dataToLog, {
+            flag: 'a+'
+        }, (err) => {
+            if (err) {
+                console.log(err)
+            }
+        })
+    } catch (ex) {
+        console.log(ex)
+    }
+}
+
+function logRawDataExecToFile(dataToLog) {
+    try {
+        fs.appendFile(filePathExec, dataToLog, {
+            flag: 'a+'
+        }, (err) => {
+            if (err) {
+                console.log(err)
+            }
+        })
+    } catch (ex) {
+        console.log(ex)
+    }
+}
+
+function hertzToGigahertz(frequencyInHertz) {
+    const frequencyInGigahertz = (frequencyInHertz / 1e9).toFixed(2); // Rounds to 4 decimal places
+    return frequencyInGigahertz;
 }

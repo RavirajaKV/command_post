@@ -36,6 +36,8 @@ const bearingCoordinates = new Array(avgBearingPoints);
 
 const filePath = "./log/log_" + currentDtTm + ".log"
 const filePathJSON = "./log/log_json_" + currentDtTm + ".log"
+const filePathExec = "./log/log_exec_" + currentDtTm + ".log"
+const filePathRaw = "./log/log_raw_" + currentDtTm + ".log"
 try {
     fs.appendFile(filePath, "\n***************** Parser start ******************", {
         flag: 'a+'
@@ -50,6 +52,30 @@ try {
 
 try {
     fs.appendFile(filePathJSON, "\n***************** JSON Parser start ******************", {
+        flag: 'a+'
+    }, (err) => {
+        if (err) {
+            console.log(err)
+        }
+    })
+} catch (ex) {
+    console.log(ex)
+}
+
+try {
+    fs.appendFile(filePathExec, "\n***************** Exception Logger start ******************", {
+        flag: 'a+'
+    }, (err) => {
+        if (err) {
+            console.log(err)
+        }
+    })
+} catch (ex) {
+    console.log(ex)
+}
+
+try {
+    fs.appendFile(filePathRaw, "\n***************** Raw Buffer data start ******************", {
         flag: 'a+'
     }, (err) => {
         if (err) {
@@ -165,8 +191,8 @@ function regenerateJSONDataFromLog() {
                     };
 
                     console.log(JSON.stringify(sampleData));
-                    if (isPointInsidePolygon([latitude, longitude])) 
-                        sendObjToClients(sampleData)
+                    //if (isPointInsidePolygon([latitude, longitude])) 
+                    sendObjToClients(sampleData)
                     
                 }
             }, index * 100); // Delay of 500 ms for each index
@@ -224,7 +250,7 @@ server.bind(2222, localIP);
 const client = new net.Socket();
 
 const port = 9991;
-const host = '103.227.98.157';
+const host = '192.168.1.75' //'103.227.98.157';
 // Replace with the server's hostname or IP address
 
 // Connect to the server
@@ -249,13 +275,13 @@ client.on('data', data => {
         majorAxis,
         minorAxis,
         detNames,
-        frequency;
+        frequency, heading, speed;
     if (dataComingIn == "json") { 
-        // console.log(`Received data plain:`, data.toString());
+        console.log(`Received data plain:`, data.toString());
         let dataString = data.toString().replace(/(?:\r\n|\r|\n)/g, '').replace(/  /g, "");
-        // console.log("-----------------------------");
-        // console.log("Recived data in string", dataString);
-        // console.log("-----------------------------");
+        console.log("-----------------------------");
+        console.log("Recived data in string", dataString);
+        console.log("-----------------------------");
 
 
         const count = countSubstrOccurrences(dataString.toLowerCase(), `{"Stream"`.toLowerCase());
@@ -265,13 +291,13 @@ client.on('data', data => {
             dataString = `{"Stream"` + dataString[1];
 
             dataString += "]]}";
-            // console.log("-----------------------------");
-            // console.log("Recived data in string", dataString);
-            // console.log("-----------------------------");
+            console.log("-----------------------------");
+            console.log("Recived data in string", dataString);
+            console.log("-----------------------------");
 
             try {
                 let jsonData = JSON.parse(dataString);
-                // console.log(dataString + "===========================================");
+                console.log(dataString + "===========================================");
                 let finalData = jsonData.Data;
                 let headersData = jsonData.Headers || [];
                 // finalData[44] = finalData[44].toString(replace(/,/g, "-");
@@ -297,15 +323,17 @@ client.on('data', data => {
 
         }
     } else if (dataComingIn == "pb") { 
-        //console.log(`Received data plain:`, data);
+        console.log(`Received data plain:`, data);
+        logRawDataToFile("\n\n"+moment().format('YYYYMMDD_HHmmss')+":\n"+data);
+
         let bufData = Buffer.from(data);
         //logDataToFile("\n\nReceived data In buffer:\n`" + bufData)
-        console.log(`Received data In buffer:`, bufData);
+        //-- console.log(`Received data In buffer:`, bufData);
 
         try { // Parse the received Protobuf message
             const decodedMessage = Pbd2.decode(bufData);
             //console.log(`Decoded data:`, decodedMessage);
-            //logDataToFile("\n" + JSON.stringify(decodedMessage))
+            //logDataToFile("\n" +moment().format('YYYYMMDD_HHmmss')+":\n"+ JSON.stringify(decodedMessage))
 
             const parsedMessage = Pbd2.toObject(decodedMessage, {
                 longs: String,
@@ -313,8 +341,8 @@ client.on('data', data => {
                 bytes: String
             });
 
-            logJSONDataToFile("\n" + JSON.stringify(parsedMessage))
-            console.log("\n Data: " + JSON.stringify(parsedMessage))
+            logJSONDataToFile("\n"+moment().format('YYYYMMDD_HHmmss')+":\n" + JSON.stringify(parsedMessage))
+            //console.log("\n Data: " + JSON.stringify(parsedMessage))
 
             let finalData = parsedMessage.Data || "";
 
@@ -324,15 +352,17 @@ client.on('data', data => {
                 let obj = {};
                 for (let finalDataObj of finalData) {
                     if (finalDataObj.ElementType == "Doubles") {
-                        obj[finalDataObj.Name] = finalDataObj.DoubleData.Values[0];
+                        obj[finalDataObj.Key] = finalDataObj.DoubleData.Values[0];
                     } else if (finalDataObj.ElementType == "Strings") {
-                        obj[finalDataObj.Name] = finalDataObj.StringData.Values[0];
+                        obj[finalDataObj.Key] = finalDataObj.StringData.Values[0];
                     }
                 }
 
-                altitude = obj["Altitude"];
-                latitude = obj["Latitude"];
-                longitude = obj["Longitude"];
+                altitude = obj["Location_Altitude"];
+                latitude = obj["Location_Latitude"];
+                longitude = obj["Location_Longitude"];
+                heading = obj["Location_Heading"];
+                speed = obj["Location_Speed"];
                 unixTime = obj["UnixTime"];
                 majorAxis = obj["Uncertainty MajorAxis"];
                 minorAxis = obj["Uncertainty MinorAxis"];
@@ -344,21 +374,22 @@ client.on('data', data => {
                 isError = true;
             }
         } catch (error) { 
-            //console.log(error);
+            //console.log(error); 
+            logRawDataExecToFile("\n "+moment().format('YYYYMMDD_HHmmss')+":\n"+data+"\n-----\n"+error);
             isError = true
         }
     }
 
     if (! isError) {
 
-        let ha = 0;
+        // let ha = 0;
 
-        pushAndReplace({lat: latitude, lon: longitude})
-        if (bearingCoordinates.length >= avgBearingPoints) {
-            ha = Number.parseInt(calculateAverageBearing(bearingCoordinates) || 0);
-        }
+        // pushAndReplace({lat: latitude, lon: longitude})
+        // if (bearingCoordinates.length >= avgBearingPoints) {
+        //     ha = Number.parseInt(calculateAverageBearing(bearingCoordinates) || 0);
+        // }
 
-        sendDataToClients(ha, altitude, latitude, longitude, unixTime, majorAxis, minorAxis, detNames, frequency);
+        sendDataToClients(heading, altitude, latitude, longitude, unixTime, majorAxis, minorAxis, detNames, frequency, speed);
     }
 });
 
@@ -372,16 +403,16 @@ client.on('error', err => {
     console.log(`Socket error: ${err}`);
 });
 
-function sendDataToClients(ha, altitude, latitude, longitude, unixTime, majorAxis, minorAxis, detNames, frequency) { // let trackName = detNames.replace("MM2", "DGI")
+function sendDataToClients(heading, altitude, latitude, longitude, unixTime, majorAxis, minorAxis, detNames, frequency, speed) { // let trackName = detNames.replace("MM2", "DGI")
 
     let sampleData = {
         "message_id": 1401,
         "message_text": {
-            "HA": ha,
+            "HA": heading,
             "HE": altitude,
             "LA": latitude,
             "LO": longitude,
-            "S": 0,
+            "S": speed,
             "T": unixTime,
             "CT": detNames, // "DL - " + trackName,
             "CS": "",
@@ -420,7 +451,7 @@ function sendDataToClients(ha, altitude, latitude, longitude, unixTime, majorAxi
             "WT": "JAMMER"
         }
     };
-    console.log(sampleData);
+    //console.log(sampleData);
     // console.log(sampleData1901);
     for (let cl of clientsArr) {
         server.send(JSON.stringify(sampleData), cl.port, cl.ip, function (error) {
@@ -442,7 +473,7 @@ function sendDataToClients(ha, altitude, latitude, longitude, unixTime, majorAxi
     }
 }
 
-function countSubstrOccurrences(str, substr) {
+function countSubstrOccurrenclearces(str, substr) {
     const occurrences = str.split(substr).length - 1;
     return occurrences;
 }
@@ -494,6 +525,34 @@ function logDataToFile(dataToLog) {
 function logJSONDataToFile(dataToLog) {
     try {
         fs.appendFile(filePathJSON, dataToLog, {
+            flag: 'a+'
+        }, (err) => {
+            if (err) {
+                console.log(err)
+            }
+        })
+    } catch (ex) {
+        console.log(ex)
+    }
+}
+
+function logRawDataToFile(dataToLog) {
+    try {
+        fs.appendFile(filePathRaw, dataToLog, {
+            flag: 'a+'
+        }, (err) => {
+            if (err) {
+                console.log(err)
+            }
+        })
+    } catch (ex) {
+        console.log(ex)
+    }
+}
+
+function logRawDataExecToFile(dataToLog) {
+    try {
+        fs.appendFile(filePathExec, dataToLog, {
             flag: 'a+'
         }, (err) => {
             if (err) {

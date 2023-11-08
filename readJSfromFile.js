@@ -44,7 +44,7 @@ function isValidJSONObject(str) {
     }
 }
 
-const filePath = './log/log_20230803_143513.log';
+const filePath = './log/log_trail.log';
 const foundJSONObjects = findJSONObjects(filePath);
 
 // Now you can work with the extracted JSON objects.
