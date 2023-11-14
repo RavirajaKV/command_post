@@ -128,8 +128,9 @@ function regenerateJSONDataFromLog() {
             }
 
             // console.log(normalizedData);
-            //console.log("Records Size: ", normalizedData.length);
+            console.log("Records Size: ", normalizedData.length);
             totalCount = totalCount + normalizedData.length;
+
 
             finalESMData.push(...normalizedData);
 
@@ -138,10 +139,12 @@ function regenerateJSONDataFromLog() {
                     let emsTrack = new ESMTrack(item);
                     //console.log(emsTrack);
 
-                    //console.log(emsTrack.Location_Latitude+","+emsTrack.Location_Longitude+",", emsTrack.Data_TimeStamp);
+                    if(normalizedData.length == 51){
+                    console.log(emsTrack.Location_Latitude+","+emsTrack.Location_Longitude+",", emsTrack.Data_TimeStamp);
+                    }
 
-                    if (!isInsideCircle(emsTrack.Location_Latitude, emsTrack.Location_Longitude)) 
-                        finalESMData.push(emsTrack);
+                    var insideCircle = isInsideCircle(emsTrack.Location_Latitude, emsTrack.Location_Longitude);
+                    if (!insideCircle) finalESMData.push(emsTrack);
                     
                     //sendESMDataToCT(emsTrack);
                 }
