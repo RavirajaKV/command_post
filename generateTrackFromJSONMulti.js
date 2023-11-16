@@ -4,7 +4,7 @@ const fs = require('fs');
 const moment = require('moment')
 const ip = require("ip");
 const ESMTrack = require('./lib/ESMTrack');
-const {escape} = require('querystring');
+const { escape } = require('querystring');
 const geolib = require('geolib');
 
 let currentDtTm = moment().format('YYYYMMDD_HHmmss');
@@ -80,7 +80,7 @@ function regenerateJSONDataFromLog() {
     const foundJSONObjects = findJSONObjects(filePathToReadLog);
 
     let totalCount = 0;
-    foundJSONObjects.forEach(parsedMessage => { 
+    foundJSONObjects.forEach(parsedMessage => {
         // console.log("\n" + JSON.stringify(parsedMessage))
 
         let hasDataObject = parsedMessage.Data || "";
@@ -119,7 +119,7 @@ function regenerateJSONDataFromLog() {
                     const values = esmDataProcessed[key];
 
                     for (let i = 0; i < values.length; i++) {
-                        if (! normalizedData[i]) {
+                        if (!normalizedData[i]) {
                             normalizedData[i] = {};
                         }
                         normalizedData[i][key] = values[i];
@@ -139,13 +139,13 @@ function regenerateJSONDataFromLog() {
                     let emsTrack = new ESMTrack(item);
                     //console.log(emsTrack);
 
-                    if(normalizedData.length == 51){
-                    console.log(emsTrack.Location_Latitude+","+emsTrack.Location_Longitude+",", emsTrack.Data_TimeStamp);
+                    if (normalizedData.length == 51) {
+                        console.log(emsTrack.Location_Latitude + "," + emsTrack.Location_Longitude + ",", emsTrack.Data_TimeStamp);
                     }
 
                     var insideCircle = isInsideCircle(emsTrack.Location_Latitude, emsTrack.Location_Longitude);
                     if (!insideCircle) finalESMData.push(emsTrack);
-                    
+
                     //sendESMDataToCT(emsTrack);
                 }
             })
@@ -170,7 +170,7 @@ function sendESMDataToCTWithDelay() {
     // Function to send data to the server
     function sendDataToServer() {
 
-        if (currentIndex < finalESMData.length) { 
+        if (currentIndex < finalESMData.length) {
             // let trackName = detNames.replace("MM2", "DGI")
 
             const emsTrack = finalESMData[currentIndex];
@@ -180,7 +180,7 @@ function sendESMDataToCTWithDelay() {
             let heading = emsTrack.Location_Heading || 0
 
             if (heading == 0) {
-                pushAndReplace({lat: emsTrack.Location_Latitude, lon: emsTrack.Location_Longitude})
+                pushAndReplace({ lat: emsTrack.Location_Latitude, lon: emsTrack.Location_Longitude })
                 if (bearingCoordinates.length >= avgBearingPoints) {
                     heading = Number.parseInt(calculateAverageBearing(bearingCoordinates) || 0);
                 }
@@ -196,7 +196,7 @@ function sendESMDataToCTWithDelay() {
                     "LO": emsTrack.Location_Longitude,
                     "S": 0,
                     "T": emsTrack.Data_TimeStamp,
-                    "CT": "AE001_"+frequencyInGigahertz, // emsTrack.Signal_Detector_Name, // "DL - " + trackName,
+                    "CT": "AE001_" + frequencyInGigahertz, // emsTrack.Signal_Detector_Name, // "DL - " + trackName,
                     "CS": "",
                     "TI": "H",
                     "MA": 0, // emsTrack.Uncertainty_Major_Axis,
@@ -240,7 +240,7 @@ function sendESMDataToCT(emsTrack) { // let trackName = detNames.replace("MM2", 
     let heading = emsTrack.Location_Heading || 0
 
     if (heading == 0) {
-        pushAndReplace({lat: emsTrack.Location_Latitude, lon: emsTrack.Location_Longitude})
+        pushAndReplace({ lat: emsTrack.Location_Latitude, lon: emsTrack.Location_Longitude })
         if (bearingCoordinates.length >= avgBearingPoints) {
             heading = Number.parseInt(calculateAverageBearing(bearingCoordinates) || 0);
         }
@@ -426,7 +426,7 @@ function isPointInsidePolygon(point) {
         const intersect = viy > y !== vjy > y && x < ((vjx - vix) * (y - viy)) / (vjy - viy) + vix;
 
         if (intersect) {
-            isInside = ! isInside;
+            isInside = !isInside;
         }
     }
 
