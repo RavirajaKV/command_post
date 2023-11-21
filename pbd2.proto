@@ -1,11 +1,11 @@
 ﻿//*****************************************************************************
-//            CRFS ProtocolBuffer Data Definition pbd2                          
+//            IIO ProtocolBuffer Data Definition pbd2          AFB                
 //*****************************************************************************
 //  For streaming, each pbd2 message is prefixed with a single 32bit length indicator
 //  for the following message length in bytes.
 
 syntax = "proto2";
-package CRFS.Data.pbd2;
+package IIO.Data.pbd2;
 
 // > The DataGeneric Message
 // DataGeneric is the basic data container for all data items and allows for association

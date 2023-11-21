@@ -78,7 +78,7 @@ try {
  Load your Protobuf message definition
  */
 const root = protobuf.loadSync('./pbd2.proto');
-const Pbd2 = root.lookupType('CRFS.Data.pbd2.DataGeneric');
+const Pbd2 = root.lookupType('IIO.Data.pbd2.DataGeneric');
 
 /*
  * Heading calculation logic
@@ -102,7 +102,6 @@ server.on('message', function (msg, info) {
 
     UDP_CLIENTS.push({ip: info.address, port: info.port})
 });
-
 
 // When socket is ready and listening for datagram msgs
 server.on('listening', function () {
@@ -137,7 +136,6 @@ server.bind(PORT_LISTEN, localIP,() => {
         //server.close();
     }); */
 });
-
 
 /*
 * Creating socket & reading data from ESM
@@ -185,6 +183,7 @@ client.on('data', data => {
             bytes: String
         });
 
+        console.log("\n" + JSON.stringify(parsedMessage));
         logJSONDataToFile("\n"+moment().format('YYYYMMDD_HHmmss')+":\n" + JSON.stringify(parsedMessage))
 
         let hasDataObject = parsedMessage.Data || "";
@@ -242,7 +241,7 @@ client.on('data', data => {
                 const frequencyInGigahertz = hertzToGigahertz(emsTrack.Analysis_Center);
                 finalESMData.push(emsTrack);
 
-                sendESMDataToCT(emsTrack, frequencyInGigahertz);
+                //sendESMDataToCT(emsTrack, frequencyInGigahertz);
             })
         } 
     } catch (error) { 

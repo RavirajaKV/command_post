@@ -1,0 +1,693 @@
+syntax = "proto2";
+package IIO.Data.pbd2;
+
+message DataGeneric {
+   optional uint32 DataVersion = 1 [default = 0];
+   optional string Name = 2;
+   optional double UnixTime = 3 [default = 0];
+   optional DataElementCollection CustomAttributes = 4;
+   optional DataElementCollection Data = 5;
+   optional uint32 ColorARGB = 6 [default = 0];
+
+   optional ThreadID StreamID = 7;
+
+   optional ThreadID OriginID = 8;
+
+   optional bool DataClear = 11 [default = false];
+
+   optional DataVolatility Volatility = 12 [default = Dynamic];
+
+   optional bool EndOfStream = 13 [default = false];
+
+   optional bool EndOfOrigin = 14 [default = false];
+
+   optional bool EndOfFile = 15 [default = false];
+
+   optional string GuidString = 16;
+
+}
+
+message DataElementCollection {
+
+   repeated DataElement Elements = 1;
+}
+
+message ThreadID {
+
+   optional string GuidString = 2;
+
+   optional string Name = 3;
+
+   optional uint32 ColorARGB = 4 [default = 0];
+
+   optional uint32 SubStream = 5;
+
+   optional uint32 Content = 6;
+}
+
+message DataElement {
+
+   optional string Name = 1;
+
+   optional StandardKeys Key = 2 [default = Not_Set];
+
+   optional NumericDataType IndexUnits = 3 [default = Undefined];
+
+   optional double IndexStart = 4;
+
+   optional double IndexStop = 5;
+
+   optional DataStorage IndexDataStore = 6;
+
+   optional NumericDataType DataUnits = 7 [default = Undefined];
+
+   optional DataElementType ElementType = 9;
+
+   optional DataElementBools BoolData = 20;
+
+   optional DataElementColors ColorData = 22;
+
+   optional DataElementDoubles DoubleData = 24;
+
+   optional DataElementTrace TraceData = 25;
+
+   optional DataElementDoubleArray2D Double2dData = 26;
+
+   optional DataElementInts IntData = 27;
+
+   optional DataElementStrings StringData = 28;
+
+   optional DataElementUInts UIntData = 29;
+
+   optional DataElementGuids GuidData = 30;
+
+   optional DataElementDataGenerics EmbeddedDataGenericData= 31;
+
+   optional DataElementBytes ByteData= 32;
+
+   optional DataElementCollection ElementAttributes = 33;
+}
+
+message DataElementBools {
+
+   repeated bool Values = 1;
+}
+
+message DataElementColors {
+
+   repeated uint32 ColorsARGB = 1;
+}
+
+message DataElementDoubleArray2D {
+
+   optional uint32 Width = 1 [default = 0];
+
+   optional DataStorage DataStore = 2;
+   optional NumericDataType XUnits = 3;
+   optional double XStart = 4;
+   optional double XStop = 5;
+   optional NumericDataType YUnits = 6;
+   optional double YStart = 7;
+   optional double YStop = 8;
+}
+
+message DataElementDoubles {
+
+   repeated double Values = 1;
+}
+
+message DataElementGuids {
+
+   repeated string GuidStrings = 2;
+}
+
+message DataElementInts {
+
+   repeated int32 Values = 1;
+}
+
+message DataElementStrings {
+
+   repeated string Values = 1;
+
+   optional TextFunction TextFunction = 2 [default = UndefinedText];
+}
+
+message DataElementTrace {
+
+   optional DataStorage YDataStore = 2;
+
+   optional DataStorage ZDataStore = 3;
+
+   optional NumericDataType ZUnits = 4 [default = Undefined];
+
+   optional ElementTraceType TraceType = 5 [default = Real];
+}
+
+message DataElementUInts {
+
+   repeated uint32 Values = 1;
+}
+
+message DataElementDataGenerics {
+
+   repeated DataGeneric Values = 1;
+}
+
+message DataElementBytes {
+
+   optional ByteDataContentType ContentType = 1 [default = blob];
+
+   optional string Description = 2;
+
+   optional bytes Values = 3;
+}
+
+message DataStorage {
+
+   optional DataStorageFormats StorageFormat = 39;
+
+   optional DsDouble DsDouble = 43;
+
+   optional DsDouble8 DsDouble8 = 44;
+
+   optional DsDouble16 DsDouble16 = 45;
+
+   optional DsDouble32 DsDouble32 = 46;
+
+   optional DsFloat DsFloat = 47;
+}
+
+message DsDouble {
+
+   repeated double Data = 1;
+}
+
+message DsDouble16 {
+
+   optional bytes Bytes = 1;
+
+   optional double Max = 2 [default = 0];
+
+   optional double Min = 3 [default = 0];
+}
+
+message DsDouble32 {
+
+   optional bytes Bytes = 1;
+
+   optional double Max = 2 [default = 0];
+
+   optional double Min = 3 [default = 0];
+}
+
+message DsDouble8 {
+
+   optional bytes Bytes = 1;
+
+   optional double Max = 2 [default = 0];
+
+   optional double Min = 3 [default = 0];
+}
+
+message DsFloat {
+
+   repeated float Values = 1;
+}
+
+enum ElementTraceType {
+   Real = 0;
+   IQ = 1;
+   MagAngDeg = 2;
+   MagAngRad = 3;
+   StartStop = 4;
+   CenterSpan = 5;
+}
+
+enum NumericDataType {
+   Undefined = 0;
+   Frequency_Hz = 100;
+   Time_sec = 101;
+   UnixTime_sec = 102;
+   Power_dBm = 103;
+   Power_W = 104;
+   Angle_deg = 105;
+   Angle_rad = 106;
+   Ratio_dB = 107;
+   Percentage = 108;
+   Voltage_V = 109;
+   Current_A = 110;
+   Correlation = 111;
+   LatitudeDeg = 112;
+   LongitudeDeg = 113;
+   Altitude_m = 114;
+   Distance_m = 115;
+   Speed_mh = 116;
+   FieldStrength_dBuVm = 117;
+   Voltage_dBuV = 118;
+   Bearing_deg = 119;
+   Bearing_rad = 120;
+   PCMAudio_codes = 121;
+   DigitalData_bits = 122;
+   HeatMap = 123;
+   Pixels_pix = 124;
+   Pitch_deg = 125;
+   Elevation_deg = 126;
+   Roll_deg = 127;
+   Elevation_rad = 128;
+   Bytes_B = 129;
+   Opacity_Percent = 130;
+   GUID_string = 131;
+   Color_ARGB = 132;
+   PropagationLoss_dB_mtr = 133;
+   AntennaGain_dBi = 134;
+   BitRate_bps = 135;
+   AlphaLevel = 136;
+   Speed_ms = 137;
+   Speed_kph = 138;
+   Speed_mph = 139;
+   Speed_knots = 140;
+   VerticalSpeed_ftpm = 141;
+   Altitude_ft = 142;
+   Hitcount = 143;
+   Time_ns = 144;
+   AntennaFactor_dB_mtr = 145;
+   Power_Spectral_Density_W_Hz = 146;
+   Decay_dB_sec = 147;
+   Point_pt = 148;
+   Temperature_degC = 149;
+   Acceleration_mss = 150;
+   RateOfTurn_deg_sec = 151;
+   Sweep_rate_Hz_sec = 152;
+   Distance_ft = 153;
+}
+
+enum StandardKeys {
+   Not_Set = 0;
+   Network_HostName = 1;
+   Network_IPAddress = 2;
+   Network_Port = 3;
+   User_Data = 5;
+   VirtualTx = 6;
+   Status_Enabled = 10;
+   Status_SourceChanging = 11;
+   Status_Alert = 12;
+   Status_Error = 13;
+   Status_Warning = 14;
+   Data_GUID = 18;
+   Data_LifetimeSeconds = 19;
+   Data_Version = 20;
+   Data_Name = 21;
+   Data_Color = 22;
+   Data_ColorGradient = 23;
+   Data_TimeStamp = 24;
+   Data_Clear = 25;
+   Data_Static = 26;
+   Data_Decimation = 27;
+   Data_IntegerData = 28;
+   Data_Scrolling = 29;
+   Data_NominalCenter = 30;
+   Data_RepeatNumber = 31;
+   Data_SampleTime = 32;
+   Data_Trace = 33;
+   Data_XData = 34;
+   Data_YData = 35;
+   Data_ZData = 36;
+   Data_XSpan = 37;
+   Data_YSpan = 38;
+   Data_ZSpan = 39;
+   Data_Gate = 40;
+   Data_EndOfFile = 41;
+   Data_Shared_Indices = 42;
+   Data_Magnitude = 43;
+   Data_Angle = 44;
+   Data_Resolution = 45;
+   Data_AntennaType = 46;
+   Data_Duration = 47;
+   Data_Detector = 48;
+   Data_ResultCount = 49;
+   Data_StandardDeviation = 50;
+   Data_IndicatorText = 51;
+   Data_IndicatorColor = 52;
+   Data_IndicatorShape = 53;
+   Data_IndicatorSize = 54;
+   Data_IndicatorRotation = 55;
+   Data_IndicatorImageKey = 56;
+   Data_Description = 57;
+   Data_Indicators = 58;
+   Data_VideoBandwidth = 59;
+   Record_Destinations = 60;
+   Record_TimeStamp = 61;
+   Data_IndicatorAlpha = 62;
+   Data_ContentIndicator = 63;
+   Data_ToolTip = 64;
+   Data_IndicatorBorderColor = 65;
+   Data_IndicatorDrawPriority = 66;
+   Data_IndicatorTooltipColor = 67;
+   Data_IndicatorRangeMin = 68;
+   Data_IndicatorRangeMax = 69;
+   Data_IndicatorLineStyle = 70;
+   GsmDemod_ARFCN = 71;
+   GsmDemod_TSC = 72;
+   GsmDemod_ChannelFrequency = 73;
+   Thread_OriginName = 80;
+   Thread_OriginGuid = 81;
+   Thread_StreamName = 82;
+   Thread_StreamGuid = 83;
+   Thread_ProviderName = 84;
+   Thread_ProviderGuid = 85;
+   Thread_EndOfStream = 86;
+   Thread_EndOfOrigin = 87;
+   Thread_OriginColor = 88;
+   Thread_StreamColor = 89;
+   Location_Altitude = 90;
+   Location_Heading = 91;
+   Location_Speed = 92;
+   Location_Latitude = 93;
+   Location_Longitude = 94;
+   Location_GpsFix = 95;
+   Location_GpsSatelites = 96;
+   Location_GpsStatus = 97;
+   Location_GpsTime = 98;
+   Location_LatitudeNorth = 99;
+   Location_LatitudeSouth = 100;
+   Location_LongitudeWest = 101;
+   Location_LongitudeEast = 102;
+   Location_NorthOffset = 103;
+   Location_Pitch = 104;
+   Location_Roll = 105;
+   AOA_Average_Bearing = 106;
+   AOA_EMA_Bearing = 107;
+   Location_GPS_Holdover_Active = 108;
+   AOA_AntennaRatio = 109;
+   AOA_Bearing = 110;
+   AOA_BearingDeviation = 111;
+   AOA_Heading = 112;
+   AOA_SNRdB = 113;
+   AOA_VectorRatio = 114;
+   AOA_QualityPercent = 115;
+   AOA_SystematicDeviation = 116;
+   AOA_Elevation = 118;
+   AOA_ElevationDeviation = 119;
+   MaskBreak_Start = 120;
+   MaskBreak_Stop = 121;
+   MaskBreak_Center = 122;
+   MaskBreak_Span = 123;
+   MaskBreak_Threshold = 124;
+   MaskBreak_Power = 125;
+   Mask_Trace = 126;
+   Mask_Dynamic_Offset = 127;
+   Mask_Start_Frequency = 128;
+   Mask_Stop_Frequency = 129;
+   DataBase_Match = 130;
+   DataBase_FileName = 131;
+   Occupancy_Min = 132;
+   Occupancy_Max = 133;
+   Occupancy_Threshold = 134;
+   Occupancy_Relative_Noise_Floor = 135;
+   Occupancy_Threshold_Units = 136;
+   Occupancy_Analysis_Type = 137;
+   MaskBreak_Snr = 138;
+   MaskBreak_IntegratedPower = 139;
+   GeoLocation_Latitude = 140;
+   GeoLocation_Longitude = 141;
+   GeoLocation_Confidence = 142;
+   GeoLocation_RadiatedPower = 143;
+   GeoLocation_Snr = 144;
+   Analysis_Center = 145;
+   Analysis_Span = 146;
+   Analysis_Processor = 147;
+   Analysis_ProcessType = 148;
+   Analysis_Nodes = 149;
+   Squelch_ThresholdExceeded = 150;
+   Analysis_TargetID = 151;
+   Analysis_Data = 152;
+   Analysis_ResultID = 153;
+   Analysis_NodeGroup = 154;
+   Analysis_MasterNodes = 155;
+   Analysis_TargetSpeed = 156;
+   Analysis_MaxPower_Node = 157;
+   Analysis_MaxPower = 158;
+   Analysis_TerrainHeight = 159;
+   HeatMap_Data = 160;
+   HeatMap_WidthPixels = 161;
+   HeatMap_HeightPixels = 162;
+   HeatMap_WidthMeters = 163;
+   HeatMap_HeightMeters = 164;
+   HeatMap_AmplitudeScale = 165;
+   HeatMap_MinValue = 166;
+   HeatMap_MaxValue = 167;
+   HeatMap_AverageValue = 168;
+   HeatMap_TransparencyValue = 169;
+   HeatMap_Elevation = 170;
+   HeatMap_ElevationOffset = 171;
+   PCM_Conversion_Gain = 180;
+   Analysis_Aperture = 181;
+   Analysis_Highlight = 182;
+   Analysis_Annotation = 183;
+   Analysis_Result_Flags = 184;
+   Uncertainty_Center_Latitude = 190;
+   Uncertainty_Center_Longitude = 191;
+   Uncertainty_Major_Axis = 192;
+   Uncertainty_Minor_Axis = 193;
+   Uncertainty_Rotation = 194;
+   Uncertainty_Altitude_Above = 195;
+   Uncertainty_Altitude_Below = 196;
+   Uncertainty_Confidence = 197;
+   Display_LineThickness = 200;
+   Display_VectorStyle = 201;
+   Display_TraceUnderFill = 202;
+   Display_TracePaletteSteps = 203;
+   Display_TracePaletteMin = 204;
+   Display_TracePaletteMax = 205;
+   Data_IndicatorTextJustify = 210;
+   Data_IndicatorLabelAlwaysVisible = 211;
+   Data_IndicatorIconColor = 212;
+   Data_IndicatorHeadingColor = 213;
+   Data_IndicatorLabelNotOnHover = 214;
+   Data_Indicator_Border_Style = 215;
+   Data_Row_Units = 250;
+   Data_Row_Min = 251;
+   Data_Row_Max = 252;
+   Data_Col_Units = 253;
+   Data_Col_Min = 254;
+   Data_Col_Max = 255;
+   Intercept_FirstBreak = 260;
+   Intercept_LastBreak = 261;
+   Intercept_MaxBreakPower = 262;
+   Intercept_CurrentBreakPower = 263;
+   Intercept_TotalHitCount = 264;
+   Intercept_LastHitCount = 265;
+   NCP_PacketFormat = 300;
+   NCP_PacketType = 301;
+   NCP_PacketTime = 302;
+   NCP_PacketSourceId = 303;
+   NCP_PacketId = 304;
+   NCP_PacketError = 305;
+   NCP_PacketWarning = 306;
+   NCP_FieldType = 307;
+   NCP_FieldId = 308;
+   NCP_FieldError = 309;
+   NCP_FieldWarning = 310;
+   NCP_FieldAck = 311;
+   NCP_ParameterKey = 312;
+   NCP_Packet = 314;
+   NCP_RawPacket = 315;
+   NCP_StatusRecords = 316;
+   NCP_FieldNameKey = 317;
+   Demodulation_FMDeviationHz = 400;
+   Demodulation_FMFrequencyOffsetHz = 401;
+   Demodulation_FMCenterFrequencyHz = 402;
+   Demodulation_AMModulationIndexPercent = 410;
+   Demodulation_AMCarrierFrequencyHz = 411;
+   Data_Segment_Number = 412;
+   Data_Number_Of_Segments = 413;
+   Data_Processing_Loop_Count = 414;
+   Data_Spectrum = 415;
+   Data_IQTime = 416;
+   Data_PCM_Audio = 417;
+   Data_WideBandDetector = 418;
+   Data_FrequencyChannelOccupancy = 419;
+   Data_Pseudo_Trace = 420;
+   Data_Noise_Floor = 421;
+   Data_Array_Offset = 422;
+   Data_Integrated_Power = 423;
+   Data_Synchronized = 424;
+   Data_SWH = 425;
+   Data_Classification = 426;
+   Data_Decision_Confidence = 427;
+   Data_Decision_Level = 428;
+   Data_Not_For_Maps = 429;
+   Data_Not_For_Recording = 430;
+   Data_Antenna_Factor = 431;
+   Data_Radio_Gain = 432;
+   Data_AGC_Attenuation = 433;
+   Data_No_Results = 434;
+   Data_Integrated_Field = 435;
+   Data_Validity_Flags = 436;
+   Data_Occupancy_Masks = 437;
+   Data_Sync_Operation = 438;
+   Data_Internal_Only = 439;
+   Data_Is_Compressed = 440;
+   Noise_Floor_Ref_Level = 441;
+   Data_Input_Port = 447;
+   Data_AGC_Mode = 448;
+   Data_Manual_Attenuation = 449;
+   Trigger_Missed_Triggers = 450;
+   Trigger_Margin = 451;
+   Trigger_Mode = 452;
+   System_Exception = 500;
+   Bin_ThreadId = 501;
+   Bin_DataType = 502;
+   Event_Type = 600;
+   Event_Source = 601;
+   Event_Data_ID = 602;
+   Event_Frequency_Center = 610;
+   Event_Frequency_Span = 611;
+   Event_Power = 612;
+   Event_Capture_Center = 613;
+   Event_Capture_Span = 614;
+   Event_Status = 615;
+   Event_Range_Center = 616;
+   Event_Range_Span = 617;
+   ADSB_CallSign = 700;
+   ADSB_Latitude = 701;
+   ADSB_Longitude = 702;
+   ADSB_Altitude = 703;
+   ADSB_Speed = 704;
+   ADSB_Bearing = 705;
+   ADSB_VerticalSpeed = 706;
+   ADSB_ICAO_Address = 707;
+   ADSB_Origin = 708;
+   ADSB_OriginName = 709;
+   ADSB_MessageData = 710;
+   ADSB_MessageTypeCode = 711;
+   ADSB_VelocityTimestamp = 712;
+   ADSB_PositionTimestamp = 713;
+   ADSB_Timestamp = 714;
+   AIS_MMSI = 715;
+   Signal_Origin = 720;
+   Signal_OriginName = 721;
+   Signal_StartTime = 722;
+   Signal_Duration = 723;
+   Signal_Buffer_Duration = 724;
+   Signal_Detector_Id = 725;
+   Signal_Detect_Level = 726;
+   Signal_Decoded_Data = 727;
+   Signal_Detect_Timestamp = 728;
+   Signal_Detector_NCP_Name = 729;
+   Signal_SNR = 730;
+   Signal_Power = 731;
+   Signal_Detector_Name = 732;
+   Signal_Bandwidth = 733;
+   Signal_Center = 734;
+   Signal_Pulse_SNR = 735;
+   Process_Type = 750;
+   Process_CPU_Time = 751;
+   Process_Wall_Time = 752;
+   Process_Pulse_Count = 753;
+   Json_Debug_Info = 754;
+   Classifier_Pulse_Count = 800;
+   Classifier_Pulse_Pattern = 801;
+   Classifier_Pulse_Rep_Freq_Nominal = 802;
+   Classifier_Pulse_Rep_Rel_Freq_Jitter = 803;
+   Classifier_Pulse_Width_Mean = 804;
+   Classifier_Pulse_Width_Rsd = 805;
+   Classifier_Pulse_Power_Mean = 806;
+   Classifier_Pulse_Power_Rsd = 807;
+   Classifier_Burst_Count_Tested = 808;
+   Classifier_Burst_Type = 809;
+   Classifier_Signal_Type = 850;
+   Classifier_Alt_Signal_Type = 851;
+   Classifier_Start_Time = 852;
+   Classifier_Center_Frequency = 853;
+   Classifier_Parent_Index = 854;
+   Classifier_Flags = 855;
+   Classifier_Pulse_Duration = 856;
+   Classifier_Bandwidth = 857;
+   Classifier_Average_Power = 858;
+   Classifier_Signal_Noise_Ratio = 859;
+   Classifier_Frequency_Error = 860;
+   Classifier_Local_Noise_Floor = 861;
+   Classifier_Probability = 862;
+   Classifier_Alt_Probability = 863;
+   Classifier_Pulse_ID = 864;
+   Classifier_Pulse_Reference_Time = 865;
+   Classifier_Symbol_Rate = 866;
+   Survey_Bin_Resolution = 900;
+   Survey_Bandwidth_Calculation_Type = 901;
+   Survey_Capture_Count = 902;
+   Survey_First_Detected = 903;
+   Survey_Last_Detected = 904;
+   Survey_Detection_Capture_Ratio = 905;
+   Survey_Peak_Power = 906;
+   Survey_Peak_Field = 907;
+   Survey_Peak_Mean_Ratio = 908;
+   Survey_Duration = 909;
+   Survey_AOA_Confidence = 910;
+   Survey_Modulation_Profile = 911;
+   Survey_Power_Profile = 912;
+   Survey_Confidence = 913;
+   Scale_Factor = 914;
+   Precision_Nano_Time = 915;
+   Data_Time_Wide_Capture = 916;
+   Data_Time_Stripe_Width = 917;
+}
+
+enum EventType {
+   Unknown = 0;
+   Mask_Break = 100;
+   Integrated_Power = 101;
+   Signal_Detection = 102;
+}
+
+enum TextFunction {
+   UndefinedText = 0;
+   GeneralText = 1;
+   Information = 2;
+   Warning = 3;
+   Error = 4;
+   Alert = 5;
+   Debug = 6;
+}
+
+enum DataVolatility {
+   Dynamic = 0;
+   Static = 1;
+}
+
+enum DataElementType {
+   UndefinedType = 0;
+   Bools = 1;
+   Colors = 2;
+   Doubles = 3;
+   DoubleArray2D = 4;
+   Guids = 5;
+   Ints = 6;
+   Uints = 7;
+   Strings = 8;
+   DoubleTrace = 9;
+   DataGenerics = 10;
+   Bytes = 11;
+}
+
+enum DataStorageFormats {
+   Default = 0;
+   Original = 1;
+   ObfuscatedText = 2;
+   _8Bit = 3;
+   _16Bit = 4;
+   _32Bit = 5;
+   _64Bit = 6;
+}
+
+enum ByteDataContentType {
+   blob = 0;
+   image_png = 1;
+   image_gif = 2;
+   image_bmp = 3;
+   image_jpg = 4;
+   audio_mp3 = 5;
+   audio_wav = 6;
+   ncp_packet = 7;
+}
