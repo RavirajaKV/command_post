@@ -14,7 +14,7 @@
     "geolib": "^3.3.4",
     "ip": "^1.1.8",
     "moment": "^2.29.4",
-    "protobufjs": "^7.2.4"
+    "protobufjs": "^7.2.5"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
