@@ -185,4 +185,4 @@ server.on("close", function () {
   console.log("Socket is closed !");
 });
 
-server.bind(7000, "localhost");
+server.bind(7000, "0.0.0.0");

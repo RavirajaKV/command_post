@@ -10,9 +10,9 @@ const ESMTrack = require('./lib/ESMTrack')
 // Config variables
 let localIP = ip.address()
 
-const C4iIP = '192.168.1.121';
+const C4iIP = '192.168.1.110';
 const PORT_LISTEN = 7000;
-const PORT_SEND = 8000;
+const PORT_SEND = 8008;
 
 const ESM_PORT = 9991 // Server port for getting ESM data
 const ESM_HOST = '192.168.1.75' //'103.227.98.157' // Server IP for getting ESM data
@@ -76,10 +76,65 @@ server.bind(PORT_LISTEN, localIP, () => {
 let finalESMData = [];
 function regenerateJSONDataFromLog() {
 
-    const filePathToReadLog = './log/log_trail.log';
+    const filePathToReadLog = './log/log_json_20231219_125251.log';
     const foundJSONObjects = findJSONObjects(filePathToReadLog);
 
-    finalESMData.push(...foundJSONObjects);
+    foundJSONObjects.forEach(parsedMessage => {
+        // console.log("\n" + JSON.stringify(parsedMessage))
+
+        let hasDataObject = parsedMessage.Data || "";
+        if (hasDataObject) {
+            let esmDataProcessed = {};
+
+            let dataElements = parsedMessage.Data.Elements;
+            dataElements.forEach((item, index) => { // console.log(item);
+                let key = item.Key;
+                let values;
+                if (item.hasOwnProperty("DoubleData")) {
+                    values = item.DoubleData.Values;
+                } else if (item.hasOwnProperty("StringData")) {
+                    values = item.StringData.Values;
+                } else if (item.hasOwnProperty("IntData")) {
+                    values = item.IntData.Values;
+                } else if (item.hasOwnProperty("GuidData")) {
+                    values = item.GuidData.GuidStrings;
+                } else if (item.hasOwnProperty("ByteData")) {
+                    values = item.ByteData.Values;
+                }
+
+                esmDataProcessed[key] = values
+            });
+
+            // Ignoring byte data...
+            if (esmDataProcessed.hasOwnProperty("Analysis_Nodes")) {
+                delete esmDataProcessed["Analysis_Nodes"];
+            }
+
+            // console.log(`********************\n`);//, esmDataProcessed);
+
+            const normalizedData = [];
+            for (const key in esmDataProcessed) {
+                if (esmDataProcessed[key] !== undefined) {
+                    const values = esmDataProcessed[key];
+
+                    for (let i = 0; i < values.length; i++) {
+                        if (!normalizedData[i]) {
+                            normalizedData[i] = {};
+                        }
+                        normalizedData[i][key] = values[i];
+                    }
+                }
+            }
+
+            // console.log(normalizedData);
+            console.log("Records Size: ", normalizedData.length);
+
+            finalESMData.push(...normalizedData);
+        }
+    })
+
+    //console.log("finalESMData: ", finalESMData.length);
+    finalESMData.sort((a, b) => a.Data_TimeStamp - b.Data_TimeStamp);
 
     sendESMDataToCTWithDelay();
 }
@@ -129,13 +184,13 @@ function sendESMDataToCTWithDelay() {
             const dataItem = finalESMData[currentIndex];
             console.log(dataItem);
 
-            server.send(dataItem.toString(), PORT_SEND, C4iIP, function (error) {
+            server.send(JSON.stringify(dataItem), PORT_SEND, C4iIP, function (error) {
                 if (error) {
                     console.log("error ", error);
                 } else {
                     console.log('ESM data sent !!!');
                     currentIndex++;
-                    setTimeout(sendDataToServer, 150); // Send the next data after 500ms
+                    setTimeout(sendDataToServer, 500); // Send the next data after 500ms
                 }
             });
         }

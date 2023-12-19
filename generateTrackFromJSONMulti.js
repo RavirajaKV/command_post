@@ -6,6 +6,7 @@ const ip = require("ip");
 const ESMTrack = require('./lib/ESMTrack');
 const { escape } = require('querystring');
 const geolib = require('geolib');
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 
 let currentDtTm = moment().format('YYYYMMDD_HHmmss');
 console.log("currentDtTm", currentDtTm)
@@ -17,6 +18,17 @@ const localIP = ip.address()
 
 const avgBearingPoints = 4
 const bearingCoordinates = new Array(avgBearingPoints);
+
+// Define CSV file headers
+const csvWriter = createCsvWriter({
+    path: './csv/' + currentDtTm + '.csv',
+    header: [
+        { id: 'Data_Time', title: 'DateTime' },
+        { id: 'Location_Latitude', title: 'Latitude' },
+        { id: 'Location_Longitude', title: 'Longitude' },
+        { id: 'Data_TimeStamp', title: 'Timestamp' }
+    ],
+});
 
 // creating a udp server
 const server = udp.createSocket('udp4');
@@ -74,20 +86,21 @@ server.on('close', function () {
 });
 
 let finalESMData = [];
+let csvData = [];
 function regenerateJSONDataFromLog() {
 
-    const filePathToReadLog = './log/log_trail.log';
+    const filePathToReadLog = './log/log_json_20231219_180031.log';
     const foundJSONObjects = findJSONObjects(filePathToReadLog);
 
     let totalCount = 0;
     foundJSONObjects.forEach(parsedMessage => {
-        // console.log("\n" + JSON.stringify(parsedMessage))
+        console.log("\n" + JSON.stringify(parsedMessage))
 
         let hasDataObject = parsedMessage.Data || "";
         if (hasDataObject) {
             let esmDataProcessed = {};
 
-            let dataElements = parsedMessage.Data.Elements;
+            let dataElements = parsedMessage.Data.Elements || [];
             dataElements.forEach((item, index) => { // console.log(item);
                 let key = item.Key;
                 let values;
@@ -131,35 +144,42 @@ function regenerateJSONDataFromLog() {
             console.log("Records Size: ", normalizedData.length);
             totalCount = totalCount + normalizedData.length;
 
-
             finalESMData.push(...normalizedData);
 
             normalizedData.forEach(item => {
                 if (!(item.Location_Latitude == 0 && item.Location_Longitude == 0)) {
                     let emsTrack = new ESMTrack(item);
                     //console.log(emsTrack);
+                    csvData.push({
+                        Data_Time: moment.unix(emsTrack.Data_TimeStamp).format('YYYY-MM-DD HH:mm:ss'),
+                        Location_Latitude: emsTrack.Location_Latitude,
+                        Location_Longitude: emsTrack.Location_Longitude,
+                        Data_TimeStamp: emsTrack.Data_TimeStamp
+                    });
 
-                    if (normalizedData.length == 51) {
-                        console.log(emsTrack.Location_Latitude + "," + emsTrack.Location_Longitude + ",", emsTrack.Data_TimeStamp);
-                    }
-
-                    var insideCircle = isInsideCircle(emsTrack.Location_Latitude, emsTrack.Location_Longitude);
-                    if (!insideCircle) finalESMData.push(emsTrack);
+                    /* var insideCircle = isInsideCircle(emsTrack.Location_Latitude, emsTrack.Location_Longitude);
+                    if (!insideCircle)  */
+                    finalESMData.push(emsTrack);
 
                     //sendESMDataToCT(emsTrack);
                 }
-            })
+            });
         }
     })
+
+    // Write data to CSV file
+    csvWriter
+        .writeRecords(csvData)
+        .then(() => console.log('CSV file written successfully'))
+        .catch((err) => console.error(err));
 
     //console.log("finalESMData: ", finalESMData.length);
     finalESMData.sort((a, b) => a.Data_TimeStamp - b.Data_TimeStamp);
 
-    sendESMDataToCTWithDelay();
+    //sendESMDataToCTWithDelay();
 
     /* finalESMData.forEach(emsTrack => {
         console.log(emsTrack.Location_Latitude + "," + emsTrack.Location_Longitude, ",red,circle,\"Dt: ", new Date(emsTrack.Data_TimeStamp * 1000), "\"");
-        
     }); */
 }
 

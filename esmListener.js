@@ -6,18 +6,19 @@ const moment = require('moment')
 const ip = require("ip")
 const geolib = require('geolib')
 const ESMTrack = require('./lib/ESMTrack')
+const { parse } = require('path')
 
 // Config variables
 let localIP = ip.address()
 
-const C4iIP = '192.168.1.121';
+const C4iIP = '192.168.1.110';
 const PORT_LISTEN = 7000;
-const PORT_SEND = 8000;
+const PORT_SEND = 8008;
 
 const ESM_PORT = 9991 // Server port for getting ESM data
 const ESM_HOST = '192.168.1.75' //'103.227.98.157' // Server IP for getting ESM data
 
-const ENABLE_LOGGER = false;
+const ENABLE_LOGGER = true;
 
 let currentDtTm = moment().format('YYYYMMDD_HHmmss');
 //console.log("currentDtTm", currentDtTm)
@@ -111,15 +112,70 @@ function createTCPClient() {
         let hexData = data.toString('hex');
         const dtUnique = moment().format('YYYYMMDD_HHmmss.SSS')
         logHexDataToFile("\n\n" + dtUnique + ":\n" + hexData);
-        console.log("\n\n" + dtUnique + ":\n" + hexData);
+        //console.log("\n\n" + dtUnique + ":\n" + hexData);
 
         try {
             const parsedMessage = DataGeneric.decode(data).toJSON();
-            console.log("\n" + JSON.stringify(parsedMessage));
+            //console.log("\n" + JSON.stringify(parsedMessage));
             logJSONDataToFile("\n" + dtUnique + ":\n" + JSON.stringify(parsedMessage))
 
-            sendESMDataToCT(parsedMessage);
+            let hasDataObject = parsedMessage.Data || "";
+            if (hasDataObject) {
+                let esmDataProcessed = {};
 
+                let dataElements = parsedMessage.Data.Elements;
+                dataElements.forEach((item, index) => {
+                    // console.log(item);
+                    let key = item.Key;
+                    let values;
+                    if (item.hasOwnProperty("DoubleData")) {
+                        values = item.DoubleData.Values;
+                    } else if (item.hasOwnProperty("StringData")) {
+                        values = item.StringData.Values;
+                    } else if (item.hasOwnProperty("IntData")) {
+                        values = item.IntData.Values;
+                    } else if (item.hasOwnProperty("GuidData")) {
+                        values = item.GuidData.GuidStrings;
+                    } else if (item.hasOwnProperty("ByteData")) {
+                        values = item.ByteData.Values;
+                    }
+                    esmDataProcessed[key] = values
+                });
+
+                // Ignoring byte data...
+                if (esmDataProcessed.hasOwnProperty("Analysis_Nodes")) {
+                    delete esmDataProcessed["Analysis_Nodes"];
+                }
+
+                const normalizedData = [];
+                for (const key in esmDataProcessed) {
+                    if (esmDataProcessed[key] !== undefined) {
+                        const values = esmDataProcessed[key];
+
+                        for (let i = 0; i < values.length; i++) {
+                            if (!normalizedData[i]) {
+                                normalizedData[i] = {};
+                            }
+                            normalizedData[i][key] = values[i];
+                        }
+                    }
+                }
+
+                //console.log(normalizedData);
+                console.log("-----------\nRecords Size: ", normalizedData.length);
+                //totalCount = totalCount + normalizedData.length;
+
+                normalizedData.forEach(item => {
+                    let emsTrack = new ESMTrack(item);
+                    //console.log("ESM Track: "+JSON.stringify(emsTrack))
+                    console.log("Timestamp: " + moment.unix(emsTrack.Data_TimeStamp).format('YYYY-MM-DD HH:mm:ss.SSS')+" ["+emsTrack.Data_TimeStamp + "];\n  Loc: (" + emsTrack.Location_Latitude + ", " + emsTrack.Location_Longitude + ");\n  Freq: " + emsTrack.Analysis_Center);
+
+                    sendESMDataToCT(emsTrack);
+                });
+            } /* else if(parsedMessage.Name == 'Keep Alive'){
+                console.log("Keep alive received!");
+                //sendESMDataToCT(parsedMessage);
+            } */
         } catch (error) {
             // console.log(error);
             const hexStr = data.toString('hex')
