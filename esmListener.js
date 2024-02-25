@@ -12,7 +12,7 @@ const { parse } = require('path')
 let localIP = ip.address()
 
 const C4iIP = '192.168.1.110';
-const PORT_LISTEN = 7000;
+const PORT_LISTEN = 7007;
 const PORT_SEND = 8008;
 
 const ESM_PORT = 9991 // Server port for getting ESM data
@@ -168,16 +168,20 @@ function createTCPClient() {
                 normalizedData.forEach(item => {
                     let emsTrack = new ESMTrack(item);
                     //console.log("ESM Track: "+JSON.stringify(emsTrack))
-                    console.log("Timestamp: " + moment.unix(emsTrack.Data_TimeStamp).format('YYYY-MM-DD HH:mm:ss.SSS')+" ["+emsTrack.Data_TimeStamp + "];\n  Loc: (" + emsTrack.Location_Latitude + ", " + emsTrack.Location_Longitude + ");\n  Freq: " + emsTrack.Analysis_Center);
+
+                    const freq = hertzToGigahertz(emsTrack.Analysis_Center);
+                    console.log("Timestamp: " + moment.unix(emsTrack.Data_TimeStamp).format('YYYY-MM-DD HH:mm:ss.SSS') + " [" + emsTrack.Data_TimeStamp + "];\n  Loc: (" + emsTrack.Location_Latitude + ", " + emsTrack.Location_Longitude + ");\n  Freq: " + emsTrack.Analysis_Center + ";\n  Freq Ghz:" + freq);
+                    emsTrack.Analysis_Center = freq
 
                     sendESMDataToCT(emsTrack);
                 });
-            } /* else if(parsedMessage.Name == 'Keep Alive'){
+            } else if(parsedMessage.Name == 'Keep Alive'){
                 console.log("Keep alive received!");
                 //sendESMDataToCT(parsedMessage);
-            } */
+            }
         } catch (error) {
             // console.log(error);
+            console.log("Exception...")
             const hexStr = data.toString('hex')
             if (hexStr != 'a8000000')
                 logRawDataExecToFile("\n " + dtUnique + ":\n" + hexStr + "\n" + error);
@@ -286,4 +290,11 @@ function logRawDataExecToFile(dataToLog) {
     } catch (ex) {
         console.log(ex)
     }
+}
+
+
+
+function hertzToGigahertz(frequencyInHertz) {
+    const frequencyInGigahertz = (frequencyInHertz / 1e9).toFixed(2); // Rounds to 4 decimal places
+    return frequencyInGigahertz;
 }

@@ -23,7 +23,7 @@ function findJSONObjects(filePath) {
     console.log("JSON Obj found", jsonObjects.length)
 
     try {
-        fs.writeFile(filePath, strToLog, (err) => {
+        fs.writeFile(filePath, JSON.stringify(jsonObjects), (err) => {
             if (err) {
                 console.log(err)
             }
@@ -44,8 +44,10 @@ function isValidJSONObject(str) {
     }
 }
 
-const filePath = './log/log_trail.log';
+const filePath = './log/IF-19012024-101558.txt';
 const foundJSONObjects = findJSONObjects(filePath);
+
+console.log(foundJSONObjects);
 
 // Now you can work with the extracted JSON objects.
 /* for (const obj of foundJSONObjects) {

@@ -139,7 +139,7 @@ server.on("message", function (msg, info) {
       }
       // let cid = udpArray.findIndex((f) => f.CT === `JA002`);
       if (u_data["CT"] === "JA002") {
-        server.send(
+        server.send(  
           JSON.stringify({
             message_id: 1901,
             message_text: {
