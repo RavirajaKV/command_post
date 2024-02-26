@@ -11,7 +11,7 @@ const { parse } = require('path')
 // Config variables
 let localIP = ip.address()
 
-const C4iIP = '192.168.1.110';
+const C4iIP = '192.168.1.125';
 const PORT_LISTEN = 7007;
 const PORT_SEND = 8008;
 
@@ -20,13 +20,14 @@ const ESM_HOST = '192.168.1.75' //'103.227.98.157' // Server IP for getting ESM 
 
 const ENABLE_LOGGER = true;
 
-let currentDtTm = moment().format('YYYYMMDD_HHmmss');
-//console.log("currentDtTm", currentDtTm)
+let currentDtTmLog = moment().format('YYYYMMDD_HHmmss');
+//console.log("currentDtTmLog", currentDtTmLog)
 
-const filePathHex = "./log/log_hex_" + currentDtTm + ".log"
-const filePathJSON = "./log/log_json_" + currentDtTm + ".log"
-const filePathExec = "./log/log_exec_" + currentDtTm + ".log"
+const filePathHex = "./log/log_hex_" + currentDtTmLog + ".log"
+const filePathJSON = "./log/log_json_" + currentDtTmLog + ".log"
+const filePathExec = "./log/log_exec_" + currentDtTmLog + ".log"
 
+let timeLoggingFormat = 'YYYY-MM-DD HH:mm:ss.SSS';
 initLoggers()
 
 /*
@@ -46,14 +47,14 @@ const server = udp.createSocket('udp4');
 
 // emits when any error occurs
 server.on('error', function (error) {
-    console.log('Error: ' + error);
+    console.log(moment().format(timeLoggingFormat) + ': Error: ' + error);
     server.close();
 });
 
 // client emits on new datagram msg
 server.on('message', function (msg, info) {
-    console.log('Data received from client: ' + msg.toString());
-    console.log('Received %d bytes from %s:%d\n', msg.length, info.address, info.port);
+    console.log(moment().format(timeLoggingFormat) + ': Data received from client: ' + msg.toString());
+    console.log(moment().format(timeLoggingFormat) + ': Received %d bytes from %s:%d\n', msg.length, info.address, info.port);
 });
 
 // When socket is ready and listening for datagram msgs
@@ -63,17 +64,17 @@ server.on('listening', function () {
     var family = address.family;
     var ipaddr = address.address;
 
-    console.log(`Server is listening ${family} => ${ipaddr}:${port}`);
+    console.log(`${moment().format(timeLoggingFormat)}: Server is listening ${family} => ${ipaddr}:${port}`);
 });
 
 // emits after the socket is closed using socket.close();
 server.on('close', function () {
-    console.log('UDP Socket is closed !');
+    console.log(`${moment().format(timeLoggingFormat)}: UDP Socket is closed !`);
 });
 
 // console.log("Server Local IP:", localIP)
 server.bind(PORT_LISTEN, localIP, () => {
-    console.log("UDP binding success!")
+    console.log(`${moment().format(timeLoggingFormat)}: UDP binding success!`)
 });
 
 function createTCPClient() {
@@ -84,7 +85,7 @@ function createTCPClient() {
 
     // Connect to the server
     client.connect(ESM_PORT, ESM_HOST, () => {
-        console.log(`Connected to ${ESM_HOST}:${ESM_PORT}`);
+        console.log(`${moment().format(timeLoggingFormat)}: Connected to ${ESM_HOST}:${ESM_PORT}`);
 
         // Send data to the server
         // client.write('Hello, server!');
@@ -92,17 +93,17 @@ function createTCPClient() {
 
     // When server connection close
     client.on('close', () => {
-        console.log('Connection closed');
+        console.log(moment().format(timeLoggingFormat) + 'Connection closed');
     });
 
     // When errors
     client.on('error', err => {
-        console.log(`Socket error: ${err}`);
+        console.log(`${moment().format(timeLoggingFormat)}: Socket error: ${err}`);
     });
 
     // Handle connection closed
     client.on('close', () => {
-        console.log('Connection closed, attempting to reconnect...');
+        console.log(moment().format(timeLoggingFormat) + 'Connection closed, attempting to reconnect...');
         setTimeout(createTCPClient, 2000); // Reconnect after a delay (e.g., 2000 milliseconds)
     });
 
@@ -162,7 +163,7 @@ function createTCPClient() {
                 }
 
                 //console.log(normalizedData);
-                console.log("-----------\nRecords Size: ", normalizedData.length);
+                console.log("  ->" + moment().format(timeLoggingFormat) + ":\nRecords Size: ", normalizedData.length);
                 //totalCount = totalCount + normalizedData.length;
 
                 normalizedData.forEach(item => {
@@ -170,22 +171,22 @@ function createTCPClient() {
                     //console.log("ESM Track: "+JSON.stringify(emsTrack))
 
                     const freq = hertzToGigahertz(emsTrack.Analysis_Center);
-                    console.log("Timestamp: " + moment.unix(emsTrack.Data_TimeStamp).format('YYYY-MM-DD HH:mm:ss.SSS') + " [" + emsTrack.Data_TimeStamp + "];\n  Loc: (" + emsTrack.Location_Latitude + ", " + emsTrack.Location_Longitude + ");\n  Freq: " + emsTrack.Analysis_Center + ";\n  Freq Ghz:" + freq);
+                    console.log(moment().format(timeLoggingFormat) + ": Timestamp: " + moment.unix(emsTrack.Data_TimeStamp).format('YYYY-MM-DD HH:mm:ss.SSS') + " [" + emsTrack.Data_TimeStamp + "];\n  Loc: (" + emsTrack.Location_Latitude + ", " + emsTrack.Location_Longitude + ");\n  Freq: " + emsTrack.Analysis_Center + ";\n  Freq Ghz:" + freq);
                     emsTrack.Analysis_Center = freq
 
                     sendESMDataToCT(emsTrack);
                 });
-            } else if(parsedMessage.Name == 'Keep Alive'){
-                console.log("Keep alive received!");
+            } else if (parsedMessage.Name == 'Keep Alive') {
+                console.log(`${moment().format(timeLoggingFormat)}: Keep alive received!`)
                 //sendESMDataToCT(parsedMessage);
             }
         } catch (error) {
-            // console.log(error);
-            console.log("Exception...")
+            //console.log(error);
             const hexStr = data.toString('hex')
-            if (hexStr != 'a8000000')
+            if (hexStr != 'a8000000'){
                 logRawDataExecToFile("\n " + dtUnique + ":\n" + hexStr + "\n" + error);
-
+                console.log(`${moment().format(timeLoggingFormat)}: Unparsable data.\n${hexStr}`)
+            }
         }
     });
 }
@@ -198,7 +199,7 @@ function sendESMDataToCT(jsonData) {
         if (error) {
             console.log("error ", error);
         } else {
-            console.log('ESM data sent to C4i !!!');
+            console.log(moment().format(timeLoggingFormat)+': ESM data sent to C4i !!!');
         }
     });
 }

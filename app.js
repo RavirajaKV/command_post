@@ -182,7 +182,7 @@ client.on('data', data => {
                 const frequencyInGigahertz = hertzToGigahertz(emsTrack.Analysis_Center);
                 finalESMData.push(emsTrack);
 
-                //sendESMDataToCT(emsTrack, frequencyInGigahertz);
+                sendESMDataToCT(emsTrack, frequencyInGigahertz);
             })
         }
     } catch (error) {
@@ -254,7 +254,7 @@ function sendESMDataToCT(emsTrack, trackId) {
             "LO": emsTrack.Location_Longitude,
             "S": 0,
             "T": Date.now(), //emsTrack.Data_TimeStamp,
-            "CT": "AE001_" + trackId,//emsTrack.Signal_Detector_Name, // "DL - " + trackName,
+            "CT": "DF4_" + trackId,//emsTrack.Signal_Detector_Name, // "DL - " + trackName,
             "CS": "",
             "TI": "H",
             "MA": emsTrack.Uncertainty_Major_Axis,
