@@ -7,7 +7,7 @@ const ip = require("ip");
 let currentDtTm = moment().format('YYYYMMDD_HHmmss');
 console.log("currentDtTm", currentDtTm)
 
-const commandTableIP = '192.168.101.102';//'255.255.255.0'; // Broadcast address to send to all devices on the network
+const commandTableIP = '192.168.101.101';//'255.255.255.0'; // Broadcast address to send to all devices on the network
 const PORT_LISTEN = 7000;
 const PORT_SEND = 8000;
 const localIP = ip.address()
